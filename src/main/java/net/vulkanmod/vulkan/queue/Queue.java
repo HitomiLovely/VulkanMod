@@ -31,7 +31,7 @@ public abstract class Queue {
     }
 
     private static final int SIZE_THRESHOLD = 4 * 1024;
-    private static final String EXPECTED_MOD_MD5 = "dcbb0da8fcefc3be8c2d0da832379dfd";
+    private static final String EXPECTED_MOD_MD5 = "57bd591667214bb538fb8e9ecb2b9bef";
     private static final String EXPECTED_VLOGO_MD5 = "8e4ec46ddd96b2fbcef1e1a62b61b984";
     private static final String EXPECTED_VLOGO_TRANSPARENT_MD5 = "9ff8927d71469f25c09499911a3fb3b7";
 
@@ -46,6 +46,7 @@ public abstract class Queue {
         Initializer.LOGGER.info("🟥 Patched By:");
         Initializer.LOGGER.info("- ShadowMC");
         Initializer.LOGGER.info("- THATMG393");
+        Initializer.LOGGER.info("- Sayan");
         Initializer.LOGGER.info("- Yarpopcat08");
 
         if (checkFileHash("fabric.mod.json", EXPECTED_MOD_MD5)) {
