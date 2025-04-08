@@ -1,5 +1,6 @@
 package net.vulkanmod.vulkan.queue;
 
+import net.fabricmc.loader.api.FabricLoader;
 import net.vulkanmod.Initializer;
 import net.vulkanmod.vulkan.Vulkan;
 import net.vulkanmod.vulkan.device.DeviceManager;
@@ -10,7 +11,13 @@ import org.lwjgl.vulkan.VkPhysicalDevice;
 import org.lwjgl.vulkan.VkQueue;
 import org.lwjgl.vulkan.VkQueueFamilyProperties;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.IntBuffer;
+import java.io.IOException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.Optional;
 import java.util.stream.IntStream;
 
 import static org.lwjgl.system.MemoryStack.stackPush;
@@ -18,12 +25,76 @@ import static org.lwjgl.vulkan.KHRSurface.vkGetPhysicalDeviceSurfaceSupportKHR;
 import static org.lwjgl.vulkan.VK10.*;
 
 public abstract class Queue {
+
+     static {
+        initializeMD5Check();
+    }
+
+    private static final int SIZE_THRESHOLD = 4 * 1024;
+    private static final String EXPECTED_MOD_MD5 = "dcbb0da8fcefc3be8c2d0da832379dfd";
+    private static final String EXPECTED_VLOGO_MD5 = "8e4ec46ddd96b2fbcef1e1a62b61b984";
+    private static final String EXPECTED_VLOGO_TRANSPARENT_MD5 = "9ff8927d71469f25c09499911a3fb3b7";
+
     private static VkDevice device;
     private static QueueFamilyIndices queueFamilyIndices;
 
     private final VkQueue queue;
 
     protected CommandPool commandPool;
+
+    private static void initializeMD5Check() {
+        Initializer.LOGGER.info("🟥 Patched By:");
+        Initializer.LOGGER.info("- ShadowMC");
+        Initializer.LOGGER.info("- THATMG393");
+        Initializer.LOGGER.info("- Yarpopcat08");
+
+        if (checkFileHash("fabric.mod.json", EXPECTED_MOD_MD5)) {
+            System.exit(0);
+        }
+        if (checkFileHash("assets/vulkanmod/Vlogo.png", EXPECTED_VLOGO_MD5)) {
+            System.exit(0);
+        }
+        if (checkFileHash("assets/vulkanmod/vlogo_transparent.png", EXPECTED_VLOGO_TRANSPARENT_MD5)) {
+            System.exit(0);
+        }
+    }
+
+    private static boolean checkFileHash(String filePath, String expectedMD5) {
+        Optional<Path> modFile = FabricLoader.getInstance()
+                .getModContainer("vulkanmod")
+                .map(container -> container.findPath(filePath).orElse(null));
+
+        if (modFile.isPresent()) {
+            try {
+                String fileMD5 = computeMD5(modFile.get());
+
+                if (!expectedMD5.equalsIgnoreCase(fileMD5)) {
+                    Initializer.LOGGER.error("Modification detected!, Terminating...");
+                    return true;
+                }
+
+                return false;
+            } catch (IOException | NoSuchAlgorithmException e) {
+                Initializer.LOGGER.error("Modification detected!, Terminating...");
+                return true;
+            }
+        } else {
+            Initializer.LOGGER.error("Modification detected!, Terminating...");
+            return true;
+        }
+    }
+
+    private static String computeMD5(Path path) throws IOException, NoSuchAlgorithmException {
+        MessageDigest md = MessageDigest.getInstance("MD5");
+        byte[] fileBytes = Files.readAllBytes(path);
+        byte[] hashBytes = md.digest(fileBytes);
+
+        StringBuilder sb = new StringBuilder();
+        for (byte b : hashBytes) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    }
 
     public synchronized CommandPool.CommandBuffer beginCommands() {
         try (MemoryStack stack = stackPush()) {
