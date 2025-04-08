@@ -65,6 +65,7 @@ public abstract class DebugScreenOverlayM {
         strings.add("CPU: " + SystemInfo.cpuInfo);
         strings.add("GPU: " + device.deviceName);
         strings.add("Driver: " + device.driverVersion);
+        strings.add("Instance: " + device.vkInstanceLoaderVersion);
         strings.add("Vulkan: " + device.vkVersion);
         strings.add("");
         strings.add("");
