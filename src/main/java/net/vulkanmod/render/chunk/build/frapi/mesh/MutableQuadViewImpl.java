@@ -204,7 +204,6 @@ public abstract class MutableQuadViewImpl extends QuadViewImpl implements QuadEm
 
 		Direction lightFace = quadView.lightFace();
 		data[baseIndex + HEADER_BITS] = EncodingFormat.lightFace(data[baseIndex + HEADER_BITS], lightFace);
-
 		data[baseIndex + HEADER_BITS] = EncodingFormat.geometryFlags(data[baseIndex + HEADER_BITS], quadView.getFlags());
 
 		this.facing = quadView.getQuadFacing();

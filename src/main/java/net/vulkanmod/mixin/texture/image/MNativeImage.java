@@ -66,6 +66,7 @@ public abstract class MNativeImage {
         RenderSystem.assertOnRenderThreadOrInit();
 
         VTextureSelector.uploadSubTexture(level, widthIn, heightIn, xOffset, yOffset, unpackSkipRows, unpackSkipPixels, this.getWidth(), this.buffer);
+        VTextureSelector.getBoundTexture().updateTextureSampler(blur, clamp, mipmap);
 
         if (autoClose) {
             this.close();
