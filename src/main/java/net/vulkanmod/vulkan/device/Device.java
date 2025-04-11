@@ -27,6 +27,7 @@ public class Device {
     public final String deviceName;
     public final String driverVersion;
     public final String vkVersion;
+    public final String vkInstanceLoaderVersion;
 
     public final VkPhysicalDeviceFeatures2 availableFeatures;
     public final VkPhysicalDeviceVulkan11Features availableFeatures11;
@@ -46,7 +47,10 @@ public class Device {
         this.vendorIdString = decodeVendor(properties.vendorID());
         this.deviceName = properties.deviceNameString();
         this.driverVersion = decodeDvrVersion(properties.driverVersion(), properties.vendorID());
-        this.vkVersion = decDefVersion(getVkVer());
+        this.vkVersion = decDefVersion(properties.apiVersion());
+        this.vkInstanceLoaderVersion = decDefVersion(getVkVer());
+
+        checkVulkanVersion(this.vkVersion);
 
         this.availableFeatures = VkPhysicalDeviceFeatures2.calloc();
         this.availableFeatures.sType$Default();
@@ -103,9 +107,18 @@ public class Device {
         return (glfwGetPlatform() == GLFW_PLATFORM_WIN32) ? (v >>> 14) + "." + (v & 0x3fff) : decDefVersion(v);
     }
 
-
     private static String decodeNvidia(int v) {
         return (v >>> 22 & 0x3FF) + "." + (v >>> 14 & 0xff) + "." + (v >>> 6 & 0xff) + "." + (v & 0xff);
+    }
+
+    private static void checkVulkanVersion(String vkVersion) {
+        String[] versionParts = vkVersion.split("\\.");
+        int major = Integer.parseInt(versionParts[0]);
+        int minor = Integer.parseInt(versionParts[1]);
+
+        if (major < 1 || (major == 1 && minor < 1)) {
+            throw new RuntimeException("Vulkan 1.1 is required to run the mod. Detected Vulkan version: " + vkVersion);
+        }
     }
 
     static int getVkVer() {
@@ -113,9 +126,6 @@ public class Device {
             var a = stack.mallocInt(1);
             vkEnumerateInstanceVersion(a);
             int vkVer1 = a.get(0);
-            if (VK_VERSION_MINOR(vkVer1) < 2) {
-                throw new RuntimeException("Vulkan 1.2 not supported: Only Has: %s".formatted(decDefVersion(vkVer1)));
-            }
             return vkVer1;
         }
     }
