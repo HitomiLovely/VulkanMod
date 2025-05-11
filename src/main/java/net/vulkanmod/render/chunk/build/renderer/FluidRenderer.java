@@ -1,12 +1,15 @@
 package net.vulkanmod.render.chunk.build.renderer;
 
+import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandler;
 import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRenderHandlerRegistry;
+import net.fabricmc.fabric.api.client.render.fluid.v1.FluidRendering;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemBlockRenderTypes;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.BlockGetter;
@@ -31,7 +34,7 @@ import net.vulkanmod.render.vertex.format.I32_SNorm;
 import net.vulkanmod.vulkan.util.ColorUtil;
 import org.joml.Vector3f;
 
-public class FluidRenderer {
+public class FluidRenderer implements FluidRendering.DefaultRenderer {
     private static final float MAX_FLUID_HEIGHT = 0.8888889F;
 
     private final BlockPos.MutableBlockPos mBlockPos = new BlockPos.MutableBlockPos();
@@ -61,13 +64,13 @@ public class FluidRenderer {
         renderType = TerrainRenderType.getRemapped(renderType);
         TerrainBufferBuilder bufferBuilder = this.resources.builderPack.builder(renderType).getBufferBuilder(QuadFacing.UNDEFINED.ordinal());
 
-        if (handler != null) {
-            handler.renderFluid(blockPos, this.resources.getRegion(), bufferBuilder, blockState, fluidState);
+        // Fallback to water/lava in case there's no handler
+        if (handler == null) {
+            boolean isLava = fluidState.is(FluidTags.LAVA);
+            handler = FluidRenderHandlerRegistry.INSTANCE.get(isLava ? Fluids.LAVA : Fluids.WATER);
         }
 
-        if (DefaultFluidRenderers.has(handler)) {
-            tessellate(blockState, fluidState, blockPos, bufferBuilder);
-        }
+        FluidRendering.render(handler, this.resources.getRegion(),blockPos, bufferBuilder, blockState, fluidState, this);
     }
 
     private boolean isFaceOccludedByState(BlockGetter blockGetter, float h, Direction direction, BlockPos blockPos, BlockState blockState) {
@@ -107,12 +110,14 @@ public class FluidRenderer {
         return blockAndTintGetter.getBlockState(mBlockPos);
     }
 
-    public void tessellate(BlockState blockState, FluidState fluidState, BlockPos blockPos, TerrainBufferBuilder bufferBuilder) {
+    public void render(FluidRenderHandler handler, BlockAndTintGetter world, BlockPos pos, VertexConsumer vertexConsumer, BlockState blockState, FluidState fluidState) {
+        render(handler, blockState, fluidState, pos, (TerrainBufferBuilder) vertexConsumer);
+    }
+
+    public void render(FluidRenderHandler handler, BlockState blockState, FluidState fluidState, BlockPos blockPos, TerrainBufferBuilder bufferBuilder) {
         BlockAndTintGetter region = this.resources.getRegion();
 
-        final FluidRenderHandler handler = getFluidRenderHandler(fluidState);
         int color = handler.getFluidColor(region, blockPos, fluidState);
-
         TextureAtlasSprite[] sprites = handler.getFluidSprites(region, blockPos, fluidState);
 
         float r = ColorUtil.ARGB.unpackR(color);
@@ -375,17 +380,6 @@ public class FluidRenderer {
             }
 
         }
-    }
-
-    private static FluidRenderHandler getFluidRenderHandler(FluidState fluidState) {
-        FluidRenderHandler handler = FluidRenderHandlerRegistry.INSTANCE.get(fluidState.getType());
-
-        // Fallback to water in case no handler was found
-        if (handler == null) {
-            handler = FluidRenderHandlerRegistry.INSTANCE.get(Fluids.WATER);
-        }
-
-        return handler;
     }
 
     private float calculateAverageHeight(BlockAndTintGetter blockAndTintGetter, Fluid fluid, float f, float g, float h, BlockPos blockPos) {

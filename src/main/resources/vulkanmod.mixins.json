@@ -57,7 +57,6 @@
     "render.entity.model.ModelPartM",
     "render.frame.MinecraftMixin",
     "render.frame.RenderSystemMixin",
-    "render.frapi.fluid.FluidRenderingImplMixin",
     "render.frapi.BakedModelM",
     "render.frapi.ItemRendererAccessor",
     "render.frapi.ItemRendererMixin",

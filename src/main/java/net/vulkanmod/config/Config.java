@@ -13,8 +13,6 @@ import java.nio.file.Path;
 import java.util.Collections;
 
 public class Config {
-
-    public int frameQueueSize = 2;
     public VideoModeSet.VideoMode videoMode = VideoModeManager.getFirstAvailable().getVideoMode();
     public int windowMode = 0;
 
@@ -26,6 +24,8 @@ public class Config {
     public int device = -1;
 
     public int ambientOcclusion = 1;
+    public int frameQueueSize = 2;
+    public int builderThreads = 0;
 
     public boolean backFaceCulling = true;
 

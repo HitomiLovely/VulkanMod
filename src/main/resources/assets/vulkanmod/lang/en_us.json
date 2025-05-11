@@ -41,5 +41,8 @@
 
   "vulkanmod.options.windowMode": "Window Mode",
   "vulkanmod.options.windowMode.windowed": "Windowed",
-  "vulkanmod.options.windowMode.windowedFullscreen": "Windowed Fullscreen"
+  "vulkanmod.options.windowMode.windowedFullscreen": "Windowed Fullscreen",
+
+  "vulkanmod.options.builderThreads": "Chunk Builder Threads",
+  "vulkanmod.options.builderThreads.auto": "Auto"
 }

@@ -225,14 +225,12 @@ public class WorldRenderer {
 
     public void allChanged() {
         if (this.level != null) {
-//            this.graphicsChanged();
             this.level.clearTintCaches();
 
             this.renderRegionCache.clear();
-            this.taskDispatcher.createThreads();
+            this.taskDispatcher.createThreads(Initializer.CONFIG.builderThreads);
 
             this.graphNeedsUpdate = true;
-//            this.generateClouds = true;
 
             this.renderDistance = this.minecraft.options.getEffectiveRenderDistance();
             if (this.sectionGrid != null) {
