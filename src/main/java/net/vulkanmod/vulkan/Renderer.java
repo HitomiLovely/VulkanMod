@@ -5,7 +5,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.client.Minecraft;
 import net.vulkanmod.Initializer;
-import net.vulkanmod.gl.GlFramebuffer;
+import net.vulkanmod.gl.VkGlFramebuffer;
 import net.vulkanmod.mixin.window.WindowAccessor;
 import net.vulkanmod.render.PipelineManager;
 import net.vulkanmod.render.chunk.WorldRenderer;
@@ -359,7 +359,7 @@ public class Renderer {
     }
 
     /**
-     * Called in case draw results are needed before the of the frame
+     * Called in case draw results are needed before the end of the frame
      */
     public void flushCmds() {
         if (!this.recordingCmds)
@@ -407,7 +407,7 @@ public class Renderer {
         this.boundRenderPass = null;
         this.boundFramebuffer = null;
 
-        GlFramebuffer.resetBoundFramebuffer();
+        VkGlFramebuffer.resetBoundFramebuffer();
     }
 
     public boolean beginRendering(RenderPass renderPass, Framebuffer framebuffer) {
@@ -497,6 +497,7 @@ public class Renderer {
         }
 
         createSyncObjects();
+        this.mainPass.onResize();
 
         this.onResizeCallbacks.forEach(Runnable::run);
         ((WindowAccessor) (Object) Minecraft.getInstance().getWindow()).getEventHandler().resizeDisplay();
@@ -572,6 +573,10 @@ public class Renderer {
         this.boundFramebuffer = framebuffer;
     }
 
+    public Framebuffer getBoundFramebuffer() {
+        return boundFramebuffer;
+    }
+
     public void setBoundRenderPass(RenderPass boundRenderPass) {
         this.boundRenderPass = boundRenderPass;
     }
@@ -598,10 +603,10 @@ public class Renderer {
         vkCmdSetLineWidth(commandBuffer, 1.0F);
     }
 
-    public static void setDepthBias(float units, float factor) {
+    public static void setDepthBias(float constant, float slope) {
         VkCommandBuffer commandBuffer = INSTANCE.currentCmdBuffer;
 
-        vkCmdSetDepthBias(commandBuffer, units, 0.0f, factor);
+        vkCmdSetDepthBias(commandBuffer, constant, 0.0f, slope);
     }
 
     public static void clearAttachments(int v) {

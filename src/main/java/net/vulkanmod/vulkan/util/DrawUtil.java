@@ -25,7 +25,7 @@ public class DrawUtil {
     public static void fastBlit() {
         GraphicsPipeline blitPipeline = PipelineManager.getFastBlitPipeline();
 
-        RenderSystem.disableCull();
+        VRenderSystem.disableCull();
         VRenderSystem.setPrimitiveTopologyGL(GL11.GL_TRIANGLES);
 
         Renderer renderer = Renderer.getInstance();
@@ -35,7 +35,7 @@ public class DrawUtil {
         VkCommandBuffer commandBuffer = Renderer.getCommandBuffer();
         VK11.vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 
-        RenderSystem.enableCull();
+        VRenderSystem.enableCull();
     }
 
     public static void defualtBlit() {

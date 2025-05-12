@@ -3,7 +3,7 @@ package net.vulkanmod.vulkan.texture;
 import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.renderer.texture.MissingTextureAtlasSprite;
 import net.vulkanmod.Initializer;
-import net.vulkanmod.gl.GlTexture;
+import net.vulkanmod.gl.VkGlTexture;
 import net.vulkanmod.vulkan.shader.Pipeline;
 import net.vulkanmod.vulkan.shader.descriptor.ImageDescriptor;
 
@@ -25,7 +25,7 @@ public abstract class VTextureSelector {
     }
 
     public static void bindTexture(int i, VulkanImage texture) {
-        if(i < 0 || i >= SIZE) {
+        if (i < 0 || i >= SIZE) {
             Initializer.LOGGER.error(String.format("On Texture binding: index %d out of range [0, %d]", i, SIZE - 1));
             return;
         }
@@ -35,7 +35,7 @@ public abstract class VTextureSelector {
     }
 
     public static void bindImage(int i, VulkanImage texture, int level) {
-        if(i < 0 || i > 7) {
+        if (i < 0 || i > 7) {
             Initializer.LOGGER.error(String.format("On Texture binding: index %d out of range [0, %d]", i, SIZE - 1));
             return;
         }
@@ -73,13 +73,13 @@ public abstract class VTextureSelector {
         for (ImageDescriptor state : imageDescriptors) {
             final int shaderTexture = RenderSystem.getShaderTexture(state.imageIdx);
 
-            GlTexture texture = GlTexture.getTexture(shaderTexture);
+            VkGlTexture texture = VkGlTexture.getTexture(shaderTexture);
 
             if (texture != null && texture.getVulkanImage() != null) {
                 VTextureSelector.bindTexture(state.imageIdx, texture.getVulkanImage());
             }
             else {
-                 texture = GlTexture.getTexture(MissingTextureAtlasSprite.getTexture().getId());
+                 texture = VkGlTexture.getTexture(MissingTextureAtlasSprite.getTexture().getId());
                 VTextureSelector.bindTexture(state.imageIdx, texture.getVulkanImage());
             }
         }
@@ -98,16 +98,23 @@ public abstract class VTextureSelector {
     }
 
     public static void setActiveTexture(int activeTexture) {
-        if(activeTexture < 0 || activeTexture >= SIZE) {
-            Initializer.LOGGER.error(String.format("On Texture binding: index %d out of range [0, %d]", activeTexture, SIZE - 1));
+        if (activeTexture < 0 || activeTexture >= SIZE) {
+            Initializer.LOGGER.error(
+                    String.format("On Texture binding: index %d out of range [0, %d]", activeTexture, SIZE - 1));
         }
 
         VTextureSelector.activeTexture = activeTexture;
     }
 
-    public static VulkanImage getBoundTexture() { return boundTextures[activeTexture]; }
+    public static VulkanImage getBoundTexture() {
+        return boundTextures[activeTexture];
+    }
 
-    public static VulkanImage getBoundTexture(int i) { return boundTextures[i]; }
+    public static VulkanImage getBoundTexture(int i) {
+        return boundTextures[i];
+    }
 
-    public static VulkanImage getWhiteTexture() { return whiteTexture; }
+    public static VulkanImage getWhiteTexture() {
+        return whiteTexture;
+    }
 }

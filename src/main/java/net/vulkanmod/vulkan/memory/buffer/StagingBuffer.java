@@ -21,13 +21,14 @@ public class StagingBuffer extends Buffer {
 
     public StagingBuffer(long size) {
         super(VK_BUFFER_USAGE_TRANSFER_SRC_BIT, MemoryTypes.HOST_MEM);
-        this.usedBytes = 0;
-        this.offset = 0;
-
         this.createBuffer(size);
     }
 
     public void copyBuffer(int size, ByteBuffer byteBuffer) {
+        this.copyBuffer(size, MemoryUtil.memAddress(byteBuffer));
+    }
+
+    public void copyBuffer(int size, long scrPtr) {
         if (size > this.bufferSize) {
             throw new IllegalArgumentException("Upload size is greater than staging buffer size.");
         }
@@ -36,7 +37,7 @@ public class StagingBuffer extends Buffer {
             submitUploads();
         }
 
-        nmemcpy(this.dataPtr + this.usedBytes, MemoryUtil.memAddress(byteBuffer), size);
+        nmemcpy(this.dataPtr + this.usedBytes, scrPtr, size);
 
         this.offset = this.usedBytes;
         this.usedBytes += size;

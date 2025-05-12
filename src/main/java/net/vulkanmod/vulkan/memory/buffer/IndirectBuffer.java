@@ -24,11 +24,12 @@ public class IndirectBuffer extends Buffer {
         int size = byteBuffer.remaining();
 
         if (size > this.bufferSize - this.usedBytes) {
-            resizeBuffer();
+            resizeBuffer((long) (this.bufferSize * 1.5f));
+            this.usedBytes = 0;
         }
 
         if (this.type.mappable()) {
-            this.type.copyToBuffer(this, size, byteBuffer);
+            this.type.copyToBuffer(this, byteBuffer, size, 0, this.usedBytes);
         } else {
             if (commandBuffer == null)
                 commandBuffer = DeviceManager.getTransferQueue().beginCommands();
@@ -41,13 +42,6 @@ public class IndirectBuffer extends Buffer {
 
         offset = usedBytes;
         usedBytes += size;
-    }
-
-    private void resizeBuffer() {
-        MemoryManager.getInstance().addToFreeable(this);
-        long newSize = this.bufferSize + (this.bufferSize >> 1);
-        this.createBuffer(newSize);
-        this.usedBytes = 0;
     }
 
     public void submitUploads() {

@@ -3,6 +3,7 @@ package net.vulkanmod.vulkan.texture;
 import net.vulkanmod.vulkan.Renderer;
 import net.vulkanmod.vulkan.device.DeviceManager;
 import net.vulkanmod.vulkan.memory.MemoryManager;
+import net.vulkanmod.vulkan.memory.buffer.Buffer;
 import net.vulkanmod.vulkan.queue.CommandPool;
 import net.vulkanmod.vulkan.util.VUtil;
 import org.lwjgl.PointerBuffer;
@@ -21,8 +22,8 @@ public abstract class ImageUtil {
                                             int bufferOffset, int bufferRowLenght, int bufferImageHeight) {
         VkBufferImageCopy.Buffer region = VkBufferImageCopy.calloc(1, stack);
         region.bufferOffset(bufferOffset);
-        region.bufferRowLength(bufferRowLenght);   // Tightly packed
-        region.bufferImageHeight(bufferImageHeight);  // Tightly packed
+        region.bufferRowLength(bufferRowLenght);
+        region.bufferImageHeight(bufferImageHeight);
         region.imageSubresource().aspectMask(VK_IMAGE_ASPECT_COLOR_BIT);
         region.imageSubresource().mipLevel(mipLevel);
         region.imageSubresource().baseArrayLayer(0);
@@ -47,7 +48,7 @@ public abstract class ImageUtil {
                                                      VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
                                                      pStagingBuffer, pStagingAllocation);
 
-            copyImageToBuffer(commandBuffer.getHandle(), pStagingBuffer.get(0), image.getId(), 0, image.width,
+            copyImageToBufferCmd(stack, commandBuffer.getHandle(), pStagingBuffer.get(0), image.getId(), 0, image.width,
                               image.height, 0, 0, 0, 0, 0);
             image.transitionImageLayout(stack, commandBuffer.getHandle(), prevLayout);
 
@@ -61,24 +62,38 @@ public abstract class ImageUtil {
         }
     }
 
-    public static void copyImageToBuffer(VkCommandBuffer commandBuffer, long buffer, long image, int mipLevel,
-                                         int width, int height, int xOffset, int yOffset, int bufferOffset,
-                                         int bufferRowLenght, int bufferImageHeight) {
+    public static void copyImageToBuffer(VulkanImage image, Buffer buffer, int mipLevel,
+                                         int width, int height, int xOffset, int yOffset,
+                                         int bufferOffset, int bufferRowLength, int bufferImageHeight) {
         try (MemoryStack stack = stackPush()) {
+            int prevLayout = image.getCurrentLayout();
+            CommandPool.CommandBuffer commandBuffer = DeviceManager.getGraphicsQueue().beginCommands();
+            image.transitionImageLayout(stack, commandBuffer.getHandle(), VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
 
-            VkBufferImageCopy.Buffer region = VkBufferImageCopy.calloc(1, stack);
-            region.bufferOffset(bufferOffset);
-            region.bufferRowLength(bufferRowLenght);   // Tightly packed
-            region.bufferImageHeight(bufferImageHeight);  // Tightly packed
-            region.imageSubresource().aspectMask(VK_IMAGE_ASPECT_COLOR_BIT);
-            region.imageSubresource().mipLevel(mipLevel);
-            region.imageSubresource().baseArrayLayer(0);
-            region.imageSubresource().layerCount(1);
-            region.imageOffset().set(xOffset, yOffset, 0);
-            region.imageExtent().set(width, height, 1);
+            copyImageToBufferCmd(stack, commandBuffer.getHandle(), buffer.getId(), image.getId(), mipLevel, width,
+                                 height, xOffset, yOffset, bufferOffset, bufferRowLength, bufferImageHeight);
+            image.transitionImageLayout(stack, commandBuffer.getHandle(), prevLayout);
 
-            vkCmdCopyImageToBuffer(commandBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, buffer, region);
+            long fence = DeviceManager.getGraphicsQueue().submitCommands(commandBuffer);
+            vkWaitForFences(DeviceManager.vkDevice, fence, true, VUtil.UINT64_MAX);
         }
+    }
+
+    public static void copyImageToBufferCmd(MemoryStack stack, VkCommandBuffer commandBuffer, long buffer, long image,
+                                            int mipLevel, int width, int height, int xOffset, int yOffset, int bufferOffset,
+                                            int bufferRowLength, int bufferImageHeight) {
+        VkBufferImageCopy.Buffer region = VkBufferImageCopy.calloc(1, stack);
+        region.bufferOffset(bufferOffset);
+        region.bufferRowLength(bufferRowLength);
+        region.bufferImageHeight(bufferImageHeight);
+        region.imageSubresource().aspectMask(VK_IMAGE_ASPECT_COLOR_BIT);
+        region.imageSubresource().mipLevel(mipLevel);
+        region.imageSubresource().baseArrayLayer(0);
+        region.imageSubresource().layerCount(1);
+        region.imageOffset().set(xOffset, yOffset, 0);
+        region.imageExtent().set(width, height, 1);
+
+        vkCmdCopyImageToBuffer(commandBuffer, image, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, buffer, region);
     }
 
     public static void blitFramebuffer(VulkanImage dstImage, int srcX0, int srcY0, int srcX1, int srcY1, int dstX0, int dstY0, int dstX1, int dstY1) {

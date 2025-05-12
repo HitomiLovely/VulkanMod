@@ -41,6 +41,6 @@ public class MainTargetMixin extends RenderTarget {
 
     @Override
     public int getColorTextureId() {
-        return Renderer.getInstance().getMainPass().getColorAttachmentGlId();
+        return Renderer.getInstance().getMainPass().getColorAttachment().id;
     }
 }

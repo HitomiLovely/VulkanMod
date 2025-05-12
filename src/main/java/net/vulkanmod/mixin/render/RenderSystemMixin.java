@@ -3,7 +3,7 @@ package net.vulkanmod.mixin.render;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexSorting;
-import net.vulkanmod.gl.GlTexture;
+import net.vulkanmod.gl.VkGlTexture;
 import net.vulkanmod.vulkan.Renderer;
 import net.vulkanmod.vulkan.VRenderSystem;
 import org.jetbrains.annotations.Nullable;
@@ -81,7 +81,7 @@ public abstract class RenderSystemMixin {
     @Overwrite
     public static void logicOp(GlStateManager.LogicOp op) {
         assertOnRenderThread();
-        VRenderSystem.logicOp(op);
+        VRenderSystem.logicOp(op.value);
     }
 
     /**
@@ -89,7 +89,7 @@ public abstract class RenderSystemMixin {
      */
     @Overwrite(remap = false)
     public static void activeTexture(int texture) {
-        GlTexture.activeTexture(texture);
+        VkGlTexture.activeTexture(texture);
     }
 
     /**
@@ -227,7 +227,7 @@ public abstract class RenderSystemMixin {
      */
     @Overwrite(remap = false)
     public static void blendFunc(GlStateManager.SourceFactor sourceFactor, GlStateManager.DestFactor destFactor) {
-        VRenderSystem.blendFunc(sourceFactor, destFactor);
+        VRenderSystem.blendFunc(sourceFactor.value, destFactor.value);
     }
 
     /**
@@ -242,8 +242,8 @@ public abstract class RenderSystemMixin {
      * @author
      */
     @Overwrite(remap = false)
-    public static void blendFuncSeparate(GlStateManager.SourceFactor p_69417_, GlStateManager.DestFactor p_69418_, GlStateManager.SourceFactor p_69419_, GlStateManager.DestFactor p_69420_) {
-        VRenderSystem.blendFuncSeparate(p_69417_, p_69418_, p_69419_, p_69420_);
+    public static void blendFuncSeparate(GlStateManager.SourceFactor sourceFactor, GlStateManager.DestFactor destFactor, GlStateManager.SourceFactor sourceFactor1, GlStateManager.DestFactor destFactor1) {
+        VRenderSystem.blendFuncSeparate(sourceFactor.value, destFactor.value, sourceFactor1.value, destFactor1.value);
     }
 
     /**
@@ -444,6 +444,6 @@ public abstract class RenderSystemMixin {
      */
     @Overwrite(remap = false)
     public static void texParameter(int target, int pname, int param) {
-        GlTexture.texParameteri(target, pname, param);
+        VkGlTexture.texParameteri(target, pname, param);
     }
 }

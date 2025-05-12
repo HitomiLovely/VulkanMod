@@ -2,7 +2,6 @@ package net.vulkanmod.vulkan.framebuffer;
 
 import it.unimi.dsi.fastutil.longs.Long2ReferenceOpenHashMap;
 import net.vulkanmod.Initializer;
-import net.vulkanmod.gl.GlTexture;
 import net.vulkanmod.render.util.MathUtil;
 import net.vulkanmod.vulkan.Renderer;
 import net.vulkanmod.vulkan.Vulkan;
@@ -40,8 +39,6 @@ public class SwapChain extends Framebuffer {
     private VkExtent2D extent2D;
     public boolean isBGRAformat;
     private boolean vsync = false;
-
-    private int[] glIds;
 
     public SwapChain() {
         this.attachmentCount = 2;
@@ -154,28 +151,13 @@ public class SwapChain extends Framebuffer {
                 long imageId = pSwapchainImages.get(i);
                 long imageView = VulkanImage.createImageView(imageId, this.format, VK_IMAGE_ASPECT_COLOR_BIT, 1);
 
-                VulkanImage image = new VulkanImage(imageId, this.format, 1, this.width, this.height, 4, 0, imageView);
+                VulkanImage image = new VulkanImage("Swapchain", imageId, this.format, 1, this.width, this.height, 4, 0, imageView);
                 image.updateTextureSampler(true, true, false);
                 this.swapChainImages.add(image);
             }
         }
 
-        createGlIds();
         createDepthResources();
-    }
-
-    private void createGlIds() {
-        this.glIds = new int[this.swapChainImages.size()];
-
-        for (int i = 0; i < this.swapChainImages.size(); i++) {
-            int id = GlTexture.genTextureId();
-            this.glIds[i] = id;
-            GlTexture.bindIdToImage(id, this.swapChainImages.get(i));
-        }
-    }
-
-    public int getColorAttachmentGlId() {
-        return this.glIds[Renderer.getCurrentImage()];
     }
 
     private long[] createFramebuffers(RenderPass renderPass) {
@@ -309,7 +291,7 @@ public class SwapChain extends Framebuffer {
             return capabilities.currentExtent();
         }
 
-        //Fallback
+        // Fallback
         IntBuffer width = stackGet().ints(0);
         IntBuffer height = stackGet().ints(0);
 
@@ -336,7 +318,7 @@ public class SwapChain extends Framebuffer {
                     }
                 }
             }
-            return VK_PRESENT_MODE_FIFO_KHR; //If None of the request modes exist/are supported by Driver
+            return VK_PRESENT_MODE_FIFO_KHR; // If None of the request modes exist/are supported by Driver
         }
     }
 

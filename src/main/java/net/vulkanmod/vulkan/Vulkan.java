@@ -26,8 +26,7 @@ import static net.vulkanmod.vulkan.queue.Queue.getQueueFamilies;
 import static net.vulkanmod.vulkan.util.VUtil.asPointerBuffer;
 import static org.lwjgl.glfw.GLFWVulkan.glfwCreateWindowSurface;
 import static org.lwjgl.glfw.GLFWVulkan.glfwGetRequiredInstanceExtensions;
-import static org.lwjgl.system.MemoryStack.stackGet;
-import static org.lwjgl.system.MemoryStack.stackPush;
+import static org.lwjgl.system.MemoryStack.*;
 import static org.lwjgl.system.MemoryUtil.NULL;
 import static org.lwjgl.util.vma.Vma.vmaCreateAllocator;
 import static org.lwjgl.util.vma.Vma.vmaDestroyAllocator;
@@ -293,6 +292,17 @@ public class Vulkan {
                     "Failed to set up debug messenger");
 
             debugMessenger = pDebugMessenger.get(0);
+        }
+    }
+
+    public static void setDebugLabel(MemoryStack stack, int objectType, long handle, String label) {
+        if (ENABLE_VALIDATION_LAYERS) {
+            VkDebugUtilsObjectNameInfoEXT nameInfo = VkDebugUtilsObjectNameInfoEXT.calloc(stack);
+            nameInfo.sType$Default();
+            nameInfo.objectType(objectType);
+            nameInfo.objectHandle(handle);
+            nameInfo.pObjectName(stackUTF8(label));
+            EXTDebugUtils.vkSetDebugUtilsObjectNameEXT(Vulkan.getVkDevice(), nameInfo);
         }
     }
 

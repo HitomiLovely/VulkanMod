@@ -75,6 +75,18 @@ public class VUtil {
         MemoryUtil.memCopy(srcPtr, dstPtr, size);
     }
 
+    public static void memcpy(ByteBuffer src, Buffer dst, long size, long srcOffset, long dstOffset) {
+        if (CHECKS) {
+            if (size > dst.getBufferSize() - dstOffset) {
+                throw new IllegalArgumentException("Upload size is greater than available dst buffer size");
+            }
+        }
+
+        final long dstPtr = dst.getDataPtr() + dstOffset;
+        final long srcPtr = MemoryUtil.memAddress(src) + srcOffset;
+        MemoryUtil.memCopy(srcPtr, dstPtr, size);
+    }
+
     public static int align(int x, int align) {
         int r = x % align;
         return r == 0 ? x : x + align - r;

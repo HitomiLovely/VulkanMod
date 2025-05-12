@@ -1,7 +1,6 @@
 package net.vulkanmod.vulkan.pass;
 
-import net.vulkanmod.vulkan.Vulkan;
-import net.vulkanmod.vulkan.framebuffer.SwapChain;
+import net.vulkanmod.gl.VkGlTexture;
 import org.lwjgl.system.MemoryStack;
 import org.lwjgl.vulkan.VkCommandBuffer;
 
@@ -13,6 +12,8 @@ public interface MainPass {
 
     void cleanUp();
 
+    void onResize();
+
     default void mainTargetBindWrite() {}
 
     default void mainTargetUnbindWrite() {}
@@ -21,7 +22,7 @@ public interface MainPass {
 
     default void bindAsTexture() {}
 
-    default int getColorAttachmentGlId() {
-        return -1;
+    default VkGlTexture getColorAttachment() {
+        throw new UnsupportedOperationException();
     }
 }

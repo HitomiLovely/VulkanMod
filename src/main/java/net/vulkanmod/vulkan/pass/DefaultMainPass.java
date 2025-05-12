@@ -2,8 +2,8 @@ package net.vulkanmod.vulkan.pass;
 
 import com.mojang.blaze3d.pipeline.RenderTarget;
 import net.minecraft.client.Minecraft;
+import net.vulkanmod.gl.VkGlTexture;
 import net.vulkanmod.vulkan.Renderer;
-import net.vulkanmod.vulkan.Vulkan;
 import net.vulkanmod.vulkan.framebuffer.Framebuffer;
 import net.vulkanmod.vulkan.framebuffer.RenderPass;
 import net.vulkanmod.vulkan.framebuffer.SwapChain;
@@ -29,11 +29,14 @@ public class DefaultMainPass implements MainPass {
     private RenderPass mainRenderPass;
     private RenderPass auxRenderPass;
 
+    private VkGlTexture[] colorAttachmentTextures;
+
     DefaultMainPass() {
         this.mainTarget = Minecraft.getInstance().getMainRenderTarget();
         this.mainFramebuffer = Renderer.getInstance().getSwapChain();
 
         createRenderPasses();
+        createSwapChainTextures();
     }
 
     private void createRenderPasses() {
@@ -73,13 +76,13 @@ public class DefaultMainPass implements MainPass {
     public void end(VkCommandBuffer commandBuffer) {
         Renderer.getInstance().endRenderPass(commandBuffer);
 
-        try(MemoryStack stack = MemoryStack.stackPush()) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
             SwapChain framebuffer = Renderer.getInstance().getSwapChain();
             framebuffer.getColorAttachment().transitionImageLayout(stack, commandBuffer, VK_IMAGE_LAYOUT_PRESENT_SRC_KHR);
         }
 
         int result = vkEndCommandBuffer(commandBuffer);
-        if(result != VK_SUCCESS) {
+        if (result != VK_SUCCESS) {
             throw new RuntimeException("Failed to record command buffer:" + result);
         }
     }
@@ -90,18 +93,23 @@ public class DefaultMainPass implements MainPass {
         this.auxRenderPass.cleanUp();
     }
 
+    @Override
+    public void onResize() {
+        this.createSwapChainTextures();
+    }
+
     public void rebindMainTarget() {
         SwapChain swapChain = Renderer.getInstance().getSwapChain();
         VkCommandBuffer commandBuffer = Renderer.getCommandBuffer();
 
         // Do not rebind if the framebuffer is already bound
         RenderPass boundRenderPass = Renderer.getInstance().getBoundRenderPass();
-        if(boundRenderPass == this.mainRenderPass || boundRenderPass == this.auxRenderPass)
+        if (boundRenderPass == this.mainRenderPass || boundRenderPass == this.auxRenderPass)
             return;
 
         Renderer.getInstance().endRenderPass(commandBuffer);
 
-        try(MemoryStack stack = MemoryStack.stackPush()) {
+        try (MemoryStack stack = MemoryStack.stackPush()) {
             swapChain.beginRenderPass(commandBuffer, this.auxRenderPass, stack);
         }
 
@@ -114,7 +122,7 @@ public class DefaultMainPass implements MainPass {
 
         // Check if render pass is using the framebuffer
         RenderPass boundRenderPass = Renderer.getInstance().getBoundRenderPass();
-        if(boundRenderPass == this.mainRenderPass || boundRenderPass == this.auxRenderPass)
+        if (boundRenderPass == this.mainRenderPass || boundRenderPass == this.auxRenderPass)
             Renderer.getInstance().endRenderPass(commandBuffer);
 
         try (MemoryStack stack = MemoryStack.stackPush()) {
@@ -124,8 +132,23 @@ public class DefaultMainPass implements MainPass {
         VTextureSelector.bindTexture(swapChain.getColorAttachment());
     }
 
-    public int getColorAttachmentGlId() {
-        SwapChain swapChain = Renderer.getInstance().getSwapChain();
-        return swapChain.getColorAttachmentGlId();
+    @Override
+    public VkGlTexture getColorAttachment() {
+        return this.colorAttachmentTextures[Renderer.getCurrentImage()];
     }
+
+    private void createSwapChainTextures() {
+        SwapChain swapChain = Renderer.getInstance().getSwapChain();
+        var swapChainImages = swapChain.getImages();
+        int imageCount = swapChainImages.size();
+        this.colorAttachmentTextures = new VkGlTexture[imageCount];
+
+        for (int i = 0; i < swapChainImages.size(); i++) {
+            int id = VkGlTexture.genTextureId();
+            VkGlTexture glTexture = VkGlTexture.getTexture(id);
+            VkGlTexture.bindIdToImage(id, swapChainImages.get(i));
+            this.colorAttachmentTextures[i] = glTexture;
+        }
+    }
+
 }
