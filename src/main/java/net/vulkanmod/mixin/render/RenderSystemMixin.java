@@ -1,10 +1,7 @@
 package net.vulkanmod.mixin.render;
 
-import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.VertexSorting;
-import net.vulkanmod.gl.VkGlTexture;
-import net.vulkanmod.vulkan.Renderer;
 import net.vulkanmod.vulkan.VRenderSystem;
 import org.jetbrains.annotations.Nullable;
 import org.joml.Matrix4f;
@@ -14,8 +11,6 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-
-import java.util.function.Consumer;
 
 import static com.mojang.blaze3d.systems.RenderSystem.*;
 
@@ -38,8 +33,7 @@ public abstract class RenderSystemMixin {
     @Shadow private static VertexSorting savedVertexSorting;
 
     @Shadow
-    public static void assertOnRenderThread() {
-    }
+    public static void assertOnRenderThread() {}
 
     /**
      * @author
@@ -61,251 +55,8 @@ public abstract class RenderSystemMixin {
      * @author
      */
     @Overwrite(remap = false)
-    public static void enableColorLogicOp() {
-        assertOnRenderThread();
-        VRenderSystem.enableColorLogicOp();
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void disableColorLogicOp() {
-        assertOnRenderThread();
-        VRenderSystem.disableColorLogicOp();
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite
-    public static void logicOp(GlStateManager.LogicOp op) {
-        assertOnRenderThread();
-        VRenderSystem.logicOp(op.value);
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void activeTexture(int texture) {
-        VkGlTexture.activeTexture(texture);
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void glGenBuffers(Consumer<Integer> consumer) {}
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void glGenVertexArrays(Consumer<Integer> consumer) {}
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
     public static int maxSupportedTextureSize() {
         return VRenderSystem.maxSupportedTextureSize();
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void clear(int mask, boolean getError) {
-        VRenderSystem.clear(mask);
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void clearColor(float r, float g, float b, float a) {
-        VRenderSystem.setClearColor(r, g, b, a);
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void clearDepth(double d) {
-        VRenderSystem.clearDepth(d);
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void enableScissor(int x, int y, int width, int height) {
-        Renderer.setScissor(x, y, width, height);
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void disableScissor() {
-        Renderer.resetScissor();
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void disableDepthTest() {
-        assertOnRenderThread();
-        //GlStateManager._disableDepthTest();
-        VRenderSystem.disableDepthTest();
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void enableDepthTest() {
-        assertOnRenderThreadOrInit();
-        VRenderSystem.enableDepthTest();
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void depthFunc(int i) {
-        assertOnRenderThread();
-        VRenderSystem.depthFunc(i);
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void depthMask(boolean b) {
-        assertOnRenderThread();
-        VRenderSystem.depthMask(b);
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void colorMask(boolean red, boolean green, boolean blue, boolean alpha) {
-        VRenderSystem.colorMask(red, green, blue, alpha);
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void blendEquation(int i) {
-        assertOnRenderThread();
-        //TODO
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void enableBlend() {
-        VRenderSystem.enableBlend();
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void disableBlend() {
-        VRenderSystem.disableBlend();
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void blendFunc(GlStateManager.SourceFactor sourceFactor, GlStateManager.DestFactor destFactor) {
-        VRenderSystem.blendFunc(sourceFactor.value, destFactor.value);
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void blendFunc(int srcFactor, int dstFactor) {
-        VRenderSystem.blendFunc(srcFactor, dstFactor);
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void blendFuncSeparate(GlStateManager.SourceFactor sourceFactor, GlStateManager.DestFactor destFactor, GlStateManager.SourceFactor sourceFactor1, GlStateManager.DestFactor destFactor1) {
-        VRenderSystem.blendFuncSeparate(sourceFactor.value, destFactor.value, sourceFactor1.value, destFactor1.value);
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void blendFuncSeparate(int srcFactorRGB, int dstFactorRGB, int srcFactorAlpha, int dstFactorAlpha) {
-        VRenderSystem.blendFuncSeparate(srcFactorRGB, dstFactorRGB, srcFactorAlpha, dstFactorAlpha);
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void enableCull() {
-        assertOnRenderThread();
-        VRenderSystem.enableCull();
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void disableCull() {
-        assertOnRenderThread();
-        VRenderSystem.disableCull();
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void polygonMode(final int face, final int mode) {
-        assertOnRenderThread();
-        VRenderSystem.setPolygonModeGL(mode);
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void enablePolygonOffset() {
-        assertOnRenderThread();
-        VRenderSystem.enablePolygonOffset();
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void disablePolygonOffset() {
-        assertOnRenderThread();
-        VRenderSystem.disablePolygonOffset();
-    }
-
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void polygonOffset(float factor, float units) {
-        assertOnRenderThread();
-        VRenderSystem.polygonOffset(factor, units);
     }
 
     /**
@@ -439,11 +190,4 @@ public abstract class RenderSystemMixin {
         VRenderSystem.calculateMVP();
     }
 
-    /**
-     * @author
-     */
-    @Overwrite(remap = false)
-    public static void texParameter(int target, int pname, int param) {
-        VkGlTexture.texParameteri(target, pname, param);
-    }
 }

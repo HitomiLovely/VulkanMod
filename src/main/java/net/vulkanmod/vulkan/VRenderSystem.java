@@ -236,6 +236,10 @@ public abstract class VRenderSystem {
         PipelineState.blendInfo.setBlendFuncSeparate(srcFactorRGB, dstFactorRGB, srcFactorAlpha, dstFactorAlpha);
     }
 
+    public static void blendOp(int op) {
+        PipelineState.blendInfo.setBlendOp(op);
+    }
+
     public static void enableColorLogicOp() {
         logicOp = true;
     }

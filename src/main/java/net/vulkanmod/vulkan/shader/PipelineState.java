@@ -1,13 +1,12 @@
 package net.vulkanmod.vulkan.shader;
 
 import com.mojang.blaze3d.platform.GlStateManager;
-import net.vulkanmod.vulkan.framebuffer.RenderPass;
 import net.vulkanmod.vulkan.VRenderSystem;
+import net.vulkanmod.vulkan.framebuffer.RenderPass;
 
 import java.util.Objects;
 
 import static org.lwjgl.vulkan.VK10.*;
-import static org.lwjgl.vulkan.VK10.VK_COMPARE_OP_EQUAL;
 
 public class PipelineState {
     private static final int DEFAULT_DEPTH_OP = 515;
@@ -26,7 +25,7 @@ public class PipelineState {
         int depthState = getDepthState();
         int logicOp = getLogicOpState();
 
-        if(currentState.checkEquals(assemblyRasterState, blendState, depthState, logicOp, currentColorMask, renderPass))
+        if (currentState.checkEquals(assemblyRasterState, blendState, depthState, logicOp, currentColorMask, renderPass))
             return currentState;
         else
             return currentState = new PipelineState(assemblyRasterState, blendState, depthState, logicOp, currentColorMask, renderPass);
@@ -69,7 +68,8 @@ public class PipelineState {
     int colorMask_i;
     int logicOp_i;
 
-    public PipelineState(int assemblyRasterState, int blendState, int depthState, int logicOp, int colorMask, RenderPass renderPass) {
+    public PipelineState(int assemblyRasterState, int blendState, int depthState, int logicOp, int colorMask,
+                         RenderPass renderPass) {
         this.renderPass = renderPass;
 
         this.assemblyRasterState = assemblyRasterState;
@@ -79,11 +79,12 @@ public class PipelineState {
         this.logicOp_i = logicOp;
     }
 
-    private boolean checkEquals(int assemblyRasterState, int blendState, int depthState, int logicOp, int colorMask, RenderPass renderPass) {
+    private boolean checkEquals(int assemblyRasterState, int blendState, int depthState, int logicOp, int colorMask,
+                                RenderPass renderPass) {
         return (blendState == this.blendState_i) && (depthState == this.depthState_i)
-                && renderPass == this.renderPass && logicOp == this.logicOp_i
-                && (assemblyRasterState == this.assemblyRasterState)
-                && colorMask == this.colorMask_i;
+               && renderPass == this.renderPass && logicOp == this.logicOp_i
+               && (assemblyRasterState == this.assemblyRasterState)
+               && colorMask == this.colorMask_i;
     }
 
     @Override
@@ -95,9 +96,9 @@ public class PipelineState {
 
         PipelineState that = (PipelineState) o;
         return (blendState_i == that.blendState_i) && (depthState_i == that.depthState_i)
-                && this.renderPass == that.renderPass && logicOp_i == that.logicOp_i
-                && this.assemblyRasterState == that.assemblyRasterState
-                && this.colorMask_i == that.colorMask_i;
+               && this.renderPass == that.renderPass && logicOp_i == that.logicOp_i
+               && this.assemblyRasterState == that.assemblyRasterState
+               && this.colorMask_i == that.colorMask_i;
     }
 
     @Override
@@ -107,7 +108,7 @@ public class PipelineState {
 
     public static BlendInfo defaultBlendInfo() {
         return new BlendInfo(true, VK_BLEND_FACTOR_SRC_ALPHA, VK_BLEND_FACTOR_ONE_MINUS_SRC_ALPHA,
-                VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO, VK_BLEND_OP_ADD);
+                             VK_BLEND_FACTOR_ONE, VK_BLEND_FACTOR_ZERO, VK_BLEND_OP_ADD);
     }
 
     public static class BlendInfo {
@@ -118,7 +119,8 @@ public class PipelineState {
         public int dstAlphaFactor;
         public int blendOp;
 
-        public BlendInfo(boolean enabled, int srcRgbFactor, int dstRgbFactor, int srcAlphaFactor, int dstAlphaFactor, int blendOp) {
+        public BlendInfo(boolean enabled, int srcRgbFactor, int dstRgbFactor, int srcAlphaFactor, int dstAlphaFactor,
+                         int blendOp) {
             this.enabled = enabled;
             this.srcRgbFactor = srcRgbFactor;
             this.dstRgbFactor = dstRgbFactor;
@@ -134,7 +136,8 @@ public class PipelineState {
             this.dstAlphaFactor = glToVulkanBlendFactor(destFactor.value);
         }
 
-        public void setBlendFuncSeparate(GlStateManager.SourceFactor srcRgb, GlStateManager.DestFactor dstRgb, GlStateManager.SourceFactor srcAlpha, GlStateManager.DestFactor dstAlpha) {
+        public void setBlendFuncSeparate(GlStateManager.SourceFactor srcRgb, GlStateManager.DestFactor dstRgb,
+                                         GlStateManager.SourceFactor srcAlpha, GlStateManager.DestFactor dstAlpha) {
             this.srcRgbFactor = glToVulkanBlendFactor(srcRgb.value);
             this.srcAlphaFactor = glToVulkanBlendFactor(srcAlpha.value);
             this.dstRgbFactor = glToVulkanBlendFactor(dstRgb.value);
@@ -269,7 +272,7 @@ public class PipelineState {
         }
 
         public static int blendOp(int state) {
-            return state >>> FUN_OFFSET;
+            return decode(state, FUN_OFFSET, OP_MASK);
         }
 
     }
@@ -340,9 +343,9 @@ public class PipelineState {
 
         public static int getColorMask(boolean r, boolean g, boolean b, boolean a) {
             return (r ? VK_COLOR_COMPONENT_R_BIT : 0)
-                    | (g ? VK_COLOR_COMPONENT_G_BIT : 0)
-                    | (b ? VK_COLOR_COMPONENT_B_BIT : 0)
-                    | (a ? VK_COLOR_COMPONENT_A_BIT : 0);
+                   | (g ? VK_COLOR_COMPONENT_G_BIT : 0)
+                   | (b ? VK_COLOR_COMPONENT_B_BIT : 0)
+                   | (a ? VK_COLOR_COMPONENT_A_BIT : 0);
         }
 
     }

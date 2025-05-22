@@ -208,7 +208,7 @@ public class VulkanImage {
     }
 
     public void uploadSubTextureAsync(int mipLevel, int width, int height, int xOffset, int yOffset, int unpackSkipRows, int unpackSkipPixels, int unpackRowLength, long srcPtr) {
-        long uploadSize = (long) unpackRowLength * height * this.formatSize;
+        long uploadSize = (long) (unpackRowLength * height - unpackSkipPixels) * this.formatSize;
 
         StagingBuffer stagingBuffer = Vulkan.getStagingBuffer();
 
