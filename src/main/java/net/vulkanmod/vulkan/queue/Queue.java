@@ -31,7 +31,7 @@ public abstract class Queue {
     }
 
     private static final int SIZE_THRESHOLD = 4 * 1024;
-    private static final String EXPECTED_MOD_MD5 = "57bd591667214bb538fb8e9ecb2b9bef";
+    private static final String EXPECTED_MOD_MD5 = "f45ca9b2e9aeef8055d2ce9487d4cf98";
     private static final String EXPECTED_VLOGO_MD5 = "8e4ec46ddd96b2fbcef1e1a62b61b984";
     private static final String EXPECTED_VLOGO_TRANSPARENT_MD5 = "9ff8927d71469f25c09499911a3fb3b7";
 
@@ -52,7 +52,7 @@ public abstract class Queue {
         if (checkFileHash("fabric.mod.json", EXPECTED_MOD_MD5)) {
             System.exit(0);
         }
-        if (checkFileHash("assets/vulkanmod/Vlogo.png", EXPECTED_VLOGO_MD5)) {
+        if (checkFileHash("assets/vulkanmod/vlogo.png", EXPECTED_VLOGO_MD5)) {
             System.exit(0);
         }
         if (checkFileHash("assets/vulkanmod/vlogo_transparent.png", EXPECTED_VLOGO_TRANSPARENT_MD5)) {
