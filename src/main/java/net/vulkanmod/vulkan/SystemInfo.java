@@ -12,7 +12,7 @@ public class SystemInfo {
     public static final String cpuInfo;
 
     static {
-        cpuInfo = isRunningOnAndroid() ? getProcessorNameForAndroid() : getProcessorNameForDesktop();
+        cpuInfo = isRunningOnAndroid() ? getProcessorNameForAndroid() + " (SoC)" : getProcessorNameForDesktop();
     }
 
     public static String getProcessorNameForAndroid() {
