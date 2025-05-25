@@ -2,7 +2,8 @@
 #include "fog.glsl"
 
 layout(binding = 0) uniform UniformBufferObject {
-   mat4 ProjMat;
+    mat4 MVP;
+    mat4 ProjMat;
 };
 
 layout(binding = 1) uniform UBO{

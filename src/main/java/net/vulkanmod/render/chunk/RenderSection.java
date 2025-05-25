@@ -2,7 +2,6 @@ package net.vulkanmod.render.chunk;
 
 import com.google.common.collect.Sets;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
-import it.unimi.dsi.fastutil.objects.Reference2ReferenceOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -22,12 +21,9 @@ import net.vulkanmod.render.chunk.util.Util;
 import net.vulkanmod.render.vertex.TerrainRenderType;
 
 import java.util.Collection;
-import java.util.Map;
 import java.util.Set;
 
 public class RenderSection {
-    static final Map<RenderSection, Set<BlockEntity>> globalBlockEntitiesMap = new Reference2ReferenceOpenHashMap<>();
-
     private ChunkArea chunkArea;
     public byte frustumIndex;
     public short lastFrame = -1;
@@ -361,25 +357,18 @@ public class RenderSection {
     }
 
     public void updateGlobalBlockEntities(Collection<BlockEntity> fullSet) {
-        if (fullSet.isEmpty())
-            return;
-
-        Set<BlockEntity> set = Sets.newHashSet(fullSet);
-        Set<BlockEntity> set1;
-        Set<BlockEntity> sectionSet;
-        synchronized (globalBlockEntitiesMap) {
-            sectionSet = globalBlockEntitiesMap.computeIfAbsent(this, (section) -> new ObjectOpenHashSet<>());
-        }
+        Set<BlockEntity> sectionSet = compileStatus.globalBlockEntities;
 
         if (sectionSet.size() != fullSet.size() || !sectionSet.containsAll(fullSet)) {
-            set1 = Sets.newHashSet(sectionSet);
-            set.removeAll(sectionSet);
-            set1.removeAll(fullSet);
+            Set<BlockEntity> toRemove = Sets.newHashSet(sectionSet);
+            Set<BlockEntity> toAdd = Sets.newHashSet(fullSet);
+            toAdd.removeAll(sectionSet);
+            toRemove.removeAll(fullSet);
 
             sectionSet.clear();
             sectionSet.addAll(fullSet);
 
-            Minecraft.getInstance().levelRenderer.updateGlobalBlockEntities(set1, set);
+            Minecraft.getInstance().levelRenderer.updateGlobalBlockEntities(toRemove, toAdd);
         }
     }
 
@@ -440,6 +429,7 @@ public class RenderSection {
 
     static class CompileStatus {
         CompiledSection compiledSection = CompiledSection.UNCOMPILED;
+        Set<BlockEntity> globalBlockEntities = new ObjectOpenHashSet<>();
         BuildTask buildTask;
         SortTransparencyTask sortTask;
     }
