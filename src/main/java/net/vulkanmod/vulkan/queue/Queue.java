@@ -43,6 +43,7 @@ public abstract class Queue {
     protected CommandPool commandPool;
 
     private static void initializeMD5Check() {
+        // in order to protect from thieves like RKMC
         Initializer.LOGGER.info("🟥 Patched By:");
         Initializer.LOGGER.info("- ShadowMC");
         Initializer.LOGGER.info("- THATMG393");
