@@ -49,7 +49,7 @@ public abstract class Queue {
         Initializer.LOGGER.info("- THATMG393");
         Initializer.LOGGER.info("- Sayan");
         Initializer.LOGGER.info("- Yarpopcat08");
-        Initializer.LOGGER.info("- whitebelyashx")
+        Initializer.LOGGER.info("- whitebelyashx");
 
         if (checkFileHash("fabric.mod.json", EXPECTED_MOD_MD5)) {
             System.exit(0);

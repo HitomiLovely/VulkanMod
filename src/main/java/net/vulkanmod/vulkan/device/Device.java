@@ -117,7 +117,7 @@ public class Device {
         int minor = Integer.parseInt(versionParts[1]);
 
         if (major < 1 || (major == 1 && minor < 1)) {
-            throw new RuntimeException("Atleast Vulkan 1.1 is required to run the mod. Detected Vulkan version: " + vkVersion);
+            throw new RuntimeException("At least Vulkan 1.1 is required to run the mod. Detected Vulkan version: " + vkVersion);
         }
     }
 
