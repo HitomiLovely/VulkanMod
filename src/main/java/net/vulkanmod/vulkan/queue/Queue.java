@@ -45,7 +45,7 @@ public abstract class Queue {
     private static void initializeMD5Check() {
         // in order to protect from thieves like RKMC
         Initializer.LOGGER.info("🟥 Patched By:");
-        Initializer.LOGGER.info("- ShadowMC");
+        Initializer.LOGGER.info("- Ryvenik (formerly ShadowMC");
         Initializer.LOGGER.info("- THATMG393");
         Initializer.LOGGER.info("- Sayan");
         Initializer.LOGGER.info("- Yarpopcat08");
@@ -73,17 +73,17 @@ public abstract class Queue {
 
                 if (!expectedMD5.equalsIgnoreCase(fileMD5)) {
                     Initializer.LOGGER.error("Modification detected!, Terminating...");
-                    return true;
+                     return true;
                 }
 
                 return false;
             } catch (IOException | NoSuchAlgorithmException e) {
                 Initializer.LOGGER.error("Modification detected!, Terminating...");
-                return true;
+                 return true;
             }
         } else {
             Initializer.LOGGER.error("Modification detected!, Terminating...");
-            return true;
+             return true;
         }
     }
 
