@@ -31,7 +31,7 @@ public abstract class Queue {
     }
 
     private static final int SIZE_THRESHOLD = 4 * 1024;
-    private static final String EXPECTED_MOD_MD5 = "f45ca9b2e9aeef8055d2ce9487d4cf98";
+    private static final String EXPECTED_MOD_MD5 = "c0df3e726ffbb8746f3f3af69c8749af";
     private static final String EXPECTED_VLOGO_MD5 = "8e4ec46ddd96b2fbcef1e1a62b61b984";
     private static final String EXPECTED_VLOGO_TRANSPARENT_MD5 = "9ff8927d71469f25c09499911a3fb3b7";
 
@@ -50,6 +50,7 @@ public abstract class Queue {
         Initializer.LOGGER.info("- Sayan");
         Initializer.LOGGER.info("- Yarpopcat08");
         Initializer.LOGGER.info("- whitebelyashx");
+        Initializer.LOGGER.info("- artDev");
 
         if (checkFileHash("fabric.mod.json", EXPECTED_MOD_MD5)) {
             System.exit(0);
